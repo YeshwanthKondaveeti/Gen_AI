@@ -1,0 +1,21 @@
+[project]
+name = "gen-ai-llm-calls"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "YeshwanthKondaveeti",email = "kondaveetiy1@gmail.com"}
+]
+requires-python = ">=3.12,<4.0"
+dependencies = [
+    "numpy (==2.2.0)",
+    "langchain (==0.3.27)",
+    "python-dotenv (==1.1.1)",
+    "langchain-google-genai (==2.1.12)",
+    "pandas (==2.2.2)",
+    "streamlit (==1.50.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
