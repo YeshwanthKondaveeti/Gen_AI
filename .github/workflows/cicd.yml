@@ -1,0 +1,61 @@
+
+name: CI/CD Sync
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *' # daily at 00:00 UTC
+  push:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    name: Pull and Push Sync
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Pull latest from remote branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # determine branch name
+          BRANCH=${GITHUB_REF#refs/heads/}
+          if [ -z "$BRANCH" ]; then BRANCH=${GITHUB_REF_NAME}; fi
+          echo "Branch: $BRANCH"
+          # ensure remote uses token so push is authorized
+          git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch origin "$BRANCH"
+          git pull origin "$BRANCH" --no-edit || true
+
+      - name: Make or detect changes (example)
+        run: |
+          # Placeholder change so a push can be demonstrated — replace with your real automation.
+          echo "Last sync: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" > .last_sync
+          git add .last_sync
+
+      - name: Commit & push if there are changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore(ci): automated sync"
+            git push origin HEAD
+          fi
+
